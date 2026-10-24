@@ -1,0 +1,262 @@
+<title>Pump Price Scenario Tool</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;700&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Layout: one column; a pump-style price board on top, controls beside it on wide screens, the 4-month path below. */
+:root {
+  --bg: #f6f7f5;
+  --panel: #ffffff;
+  --ink: #15191c;
+  --ink-2: #545c63;
+  --line: #dfe3e1;
+  --accent: #2a78d6;      /* crude-to-gasoline, matches report charts */
+  --crude: #eb6834;
+  --board: #101418;       /* the pump price display */
+  --board-ink: #f2c94c;
+  --up: #c2410c;
+  --down: #15803d;
+  --display: "Barlow Condensed", "Arial Narrow", sans-serif;
+  --body: "Barlow", "Segoe UI", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #121517; --panel: #1b1f22; --ink: #eef0ef; --ink-2: #a7afb5; --line: #2c3236;
+    --accent: #5a9be8; --crude: #f08050; --board: #07090a; --board-ink: #f2c94c;
+    --up: #fb923c; --down: #4ade80; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #121517; --panel: #1b1f22; --ink: #eef0ef; --ink-2: #a7afb5; --line: #2c3236;
+  --accent: #5a9be8; --crude: #f08050; --board: #07090a; --board-ink: #f2c94c;
+  --up: #fb923c; --down: #4ade80; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--ink); font: 16px/1.5 var(--body);
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 28px 48px;
+}
+.wrap { max-width: 980px; margin: 0 auto; display: grid; gap: 28px; }
+header { display: grid; gap: 6px; }
+.eyebrow { font: 600 12px/1 var(--body); letter-spacing: .12em; text-transform: uppercase; color: var(--ink-2); }
+h1 { font: 700 clamp(30px, 5vw, 44px)/1.05 var(--display); margin: 0; text-wrap: balance; }
+header p { margin: 0; color: var(--ink-2); max-width: 64ch; }
+
+.top { display: grid; grid-template-columns: 1.1fr 1fr; gap: 20px; align-items: stretch; }
+@media (max-width: 760px) { .top { grid-template-columns: 1fr; } }
+
+.board { background: var(--board); color: #e9ecee; border-radius: 10px; padding: 22px 24px; display: grid; gap: 14px; min-width: 0; }
+.board .label { font: 600 12px/1 var(--body); letter-spacing: .14em; text-transform: uppercase; color: #9aa4ab; }
+.price { font: 500 clamp(64px, 12vw, 104px)/0.9 var(--mono); color: var(--board-ink); font-variant-numeric: tabular-nums; letter-spacing: -0.02em; display: flex; align-items: flex-start; }
+.price .cur { font-size: .45em; margin-top: .15em; margin-right: .05em; }
+.price sup { font-size: .32em; margin-top: .2em; margin-left: .06em; }
+.board .row { display: flex; gap: 18px; flex-wrap: wrap; font: 500 15px/1.3 var(--body); color: #c9d0d5; }
+.board .row b { font-family: var(--mono); font-weight: 500; color: #fff; }
+.delta { font: 500 15px var(--mono); padding: 3px 8px; border-radius: 4px; background: #23292e; }
+.delta.up { color: #fdba74; } .delta.down { color: #86efac; }
+
+.controls { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 20px; display: grid; gap: 18px; min-width: 0; }
+.field { display: grid; gap: 8px; }
+.field label { font-weight: 600; font-size: 14px; display: flex; justify-content: space-between; gap: 8px; }
+.field label output { font-family: var(--mono); font-weight: 500; color: var(--accent); }
+input[type=range] { width: 100%; accent-color: var(--accent); }
+.ticks { display: flex; justify-content: space-between; font: 12px var(--mono); color: var(--ink-2); }
+.pair { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+input[type=number] { width: 100%; font: 500 16px var(--mono); padding: 8px 10px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); color: var(--ink); }
+input:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.presets { display: flex; flex-wrap: wrap; gap: 8px; }
+.presets button { font: 500 14px var(--mono); padding: 6px 12px; border-radius: 999px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); cursor: pointer; }
+.presets button:hover { border-color: var(--accent); }
+.presets button[aria-pressed=true] { background: var(--accent); border-color: var(--accent); color: #fff; }
+.hint { font-size: 13px; color: var(--ink-2); margin: 0; }
+
+section h2 { font: 700 24px/1.1 var(--display); margin: 0 0 4px; }
+section > p { margin: 0 0 14px; color: var(--ink-2); max-width: 70ch; }
+.chartbox { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 16px; overflow-x: auto; }
+svg text { font-family: var(--body); }
+table { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; }
+th, td { text-align: right; padding: 8px 10px; border-bottom: 1px solid var(--line); font-size: 15px; }
+th:first-child, td:first-child { text-align: left; }
+th { font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--ink-2); font-weight: 600; }
+td { font-family: var(--mono); font-size: 14px; }
+td:first-child { font-family: var(--body); font-size: 15px; }
+.tablebox { overflow-x: auto; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 4px 8px; }
+.notes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px 28px; }
+@media (max-width: 640px) { .notes { grid-template-columns: 1fr; } }
+#path { min-width: 620px; display: block; }
+.notes div { min-width: 0; }
+.notes h3 { font: 600 15px var(--body); margin: 0 0 4px; }
+.notes p { margin: 0; color: var(--ink-2); font-size: 14.5px; }
+footer { font-size: 13px; color: var(--ink-2); border-top: 1px solid var(--line); padding-top: 14px; }
+footer a { color: var(--accent); }
+@media (prefers-reduced-motion: no-preference) { .price { transition: color .2s; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <span class="eyebrow">Oil &amp; Gas Price Drivers · Scenario model</span>
+    <h1>What happens at the pump if crude oil moves?</h1>
+    <p>Move the slider to shock the crude oil price. The model, estimated on 255 months of U.S. data (2005 to 2026), shows the new national average gasoline price and how quickly it gets there.</p>
+  </header>
+
+  <div class="top">
+    <div class="board" aria-live="polite">
+      <span class="label">Regular gasoline · after full pass-through</span>
+      <div class="price" id="price"><span class="cur">$</span><span id="dollars">4.85</span><sup>4</sup></div>
+      <div class="row">
+        <span>Change <span class="delta up" id="delta">+$0.49</span></span>
+        <span>Likely range <b id="range">$4.76 to $4.94</b></span>
+      </div>
+      <div class="row">
+        <span>Crude (WTI) <b id="wtiNew">$116.77</b>/bbl</span>
+        <span>from <b id="wtiBase">$97.31</b></span>
+      </div>
+    </div>
+
+    <form class="controls" id="form" autocomplete="off">
+      <div class="field">
+        <label for="shock">Crude oil price change <output id="shockOut" for="shock">+20%</output></label>
+        <input type="range" id="shock" min="-50" max="50" step="1" value="20">
+        <div class="ticks"><span>-50%</span><span>0</span><span>+50%</span></div>
+      </div>
+      <div class="presets" role="group" aria-label="Preset scenarios">
+        <button type="button" data-v="-30">-30%</button>
+        <button type="button" data-v="-10">-10%</button>
+        <button type="button" data-v="10">+10%</button>
+        <button type="button" data-v="20">+20%</button>
+        <button type="button" data-v="50">+50%</button>
+      </div>
+      <div class="pair">
+        <div class="field">
+          <label for="baseWti">Starting WTI ($/bbl)</label>
+          <input type="number" id="baseWti" step="0.01" min="5" value="97.31">
+        </div>
+        <div class="field">
+          <label for="baseGas">Starting gas ($/gal)</label>
+          <input type="number" id="baseGas" step="0.001" min="0.5" value="4.355">
+        </div>
+      </div>
+      <p class="hint">Defaults are the September 2026 monthly averages from FRED.</p>
+    </form>
+  </div>
+
+  <section>
+    <h2>How fast it reaches the pump</h2>
+    <p>Most of a crude move shows up in the same month. The rest arrives the next month, then prices settle.</p>
+    <div class="chartbox"><svg id="path" viewBox="0 0 900 300" width="100%" role="img" aria-label="Gasoline price path over four months"></svg></div>
+  </section>
+
+  <section>
+    <h2>Month by month</h2>
+    <div class="tablebox">
+      <table>
+        <thead><tr><th>Month</th><th>Share passed through</th><th>Gas change</th><th>Gas price</th></tr></thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2>How to read this</h2>
+    <div class="notes">
+      <div><h3>Rule of thumb</h3><p>Every $1 per barrel on crude adds about 2.6 cents per gallon at the pump. A barrel holds 42 gallons, so roughly 100% of the crude cost passes through.</p></div>
+      <div><h3>What it leaves out</h3><p>The model holds the retail spread (refining, taxes, margin) fixed. That spread jumped about 50 cents after 2021, and refinery outages or hurricanes can move it again.</p></div>
+      <div><h3>Up vs. down</h3><p>Prices did not rise measurably faster than they fell at monthly frequency (t-stat about 1), so the same path is used for increases and decreases.</p></div>
+      <div><h3>Range</h3><p>The likely range is a 95% interval on the long-run pass-through estimate (108% ± 19%). It covers model uncertainty, not other shocks.</p></div>
+    </div>
+  </section>
+
+  <footer>Data: FRED (GASREGW, MCOILWTICO) and EIA. Model: distributed-lag regression on monthly changes with Newey-West standard errors. Analysis by Jobayer Ibne Saidur.</footer>
+</div>
+
+<script>
+(function () {
+  // cumulative pass-through by month (share of crude $/gal change), from outputs/results.json
+  var CUM = [0.7261, 1.1130, 1.0990, 1.0760];
+  var LR = 1.0760, LR_SE = 0.0950, GAL = 42;
+  var $ = function (id) { return document.getElementById(id); };
+  var shock = $("shock"), baseWti = $("baseWti"), baseGas = $("baseGas");
+  var css = getComputedStyle(document.documentElement);
+  function tok(n) { return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); }
+  function money(v, d) { return (v < 0 ? "-$" : "$") + Math.abs(v).toFixed(d == null ? 2 : d); }
+  function signed(v) { return (v >= 0 ? "+$" : "-$") + Math.abs(v).toFixed(2); }
+
+  function render() {
+    var pct = +shock.value, w0 = +baseWti.value || 0, g0 = +baseGas.value || 0;
+    var dCrudeGal = w0 * pct / 100 / GAL;
+    var path = CUM.map(function (c) { return dCrudeGal * c; });
+    var final = g0 + path[path.length - 1];
+    var lo = g0 + dCrudeGal * (LR - 1.96 * LR_SE), hi = g0 + dCrudeGal * (LR + 1.96 * LR_SE);
+    if (lo > hi) { var t = lo; lo = hi; hi = t; }
+
+    $("shockOut").textContent = (pct > 0 ? "+" : "") + pct + "%";
+    // pump-style price: dollars and cents, tenths of a cent raised
+    var str = Math.max(0, final).toFixed(3);
+    $("dollars").textContent = str.slice(0, -1);
+    $("price").querySelector("sup").textContent = str.slice(-1);
+    var dl = $("delta");
+    dl.textContent = signed(final - g0);
+    dl.className = "delta " + (final >= g0 ? "up" : "down");
+    $("range").textContent = money(lo) + " to " + money(hi);
+    $("wtiNew").textContent = money(w0 * (1 + pct / 100));
+    $("wtiBase").textContent = money(w0);
+    document.querySelectorAll(".presets button").forEach(function (b) {
+      b.setAttribute("aria-pressed", String(+b.dataset.v === pct));
+    });
+
+    var names = ["Same month", "Month +1", "Month +2", "Month +3"];
+    $("tbody").innerHTML = path.map(function (p, i) {
+      return "<tr><td>" + names[i] + "</td><td>" + Math.round(CUM[i] * 100) + "%</td><td>" +
+        signed(p) + "</td><td>" + money(g0 + p, 3) + "</td></tr>";
+    }).join("");
+    drawPath(g0, path);
+  }
+
+  function drawPath(g0, path) {
+    var svg = $("path"), W = 900, H = 300, L = 70, R = 150, T = 24, B = 44;
+    var pts = [g0].concat(path.map(function (p) { return g0 + p; }));
+    var labels = ["Before", "Same month", "+1 month", "+2 months", "+3 months"];
+    var mn = Math.min.apply(null, pts), mx = Math.max.apply(null, pts);
+    var pad = Math.max(0.1, (mx - mn) * 0.25); mn -= pad; mx += pad;
+    // round axis to 10 cents
+    mn = Math.floor(mn * 10) / 10; mx = Math.ceil(mx * 10) / 10;
+    var x = function (i) { return L + i * (W - L - R) / (pts.length - 1); };
+    var y = function (v) { return T + (mx - v) / (mx - mn) * (H - T - B); };
+    var ink2 = tok("--ink-2"), line = tok("--line"), acc = tok("--accent"), ink = tok("--ink");
+    var s = "";
+    var step = (mx - mn) > 1.2 ? 0.5 : (mx - mn) > 0.5 ? 0.2 : 0.1;
+    for (var v = Math.ceil(mn / step) * step; v <= mx + 1e-9; v += step) {
+      s += '<line x1="' + L + '" x2="' + (W - R + 20) + '" y1="' + y(v) + '" y2="' + y(v) + '" stroke="' + line + '" stroke-width="1"/>';
+      s += '<text x="' + (L - 10) + '" y="' + (y(v) + 4) + '" text-anchor="end" font-size="13" fill="' + ink2 + '">$' + v.toFixed(2) + '</text>';
+    }
+    s += '<line x1="' + x(0) + '" x2="' + (W - R + 20) + '" y1="' + y(g0) + '" y2="' + y(g0) + '" stroke="' + ink2 + '" stroke-dasharray="4 4" stroke-width="1"/>';
+    s += '<text x="' + (W - R + 26) + '" y="' + (y(g0) + 4) + '" font-size="13" fill="' + ink2 + '">Starting price</text>';
+    var d = pts.map(function (p, i) { return (i ? "L" : "M") + x(i) + " " + y(p); }).join(" ");
+    s += '<path d="' + d + '" fill="none" stroke="' + acc + '" stroke-width="2.5" stroke-linejoin="round"/>';
+    pts.forEach(function (p, i) {
+      s += '<circle cx="' + x(i) + '" cy="' + y(p) + '" r="5" fill="' + acc + '" stroke="' + tok("--panel") + '" stroke-width="2"/>';
+      s += '<text x="' + x(i) + '" y="' + (H - 16) + '" text-anchor="middle" font-size="13" fill="' + ink2 + '">' + labels[i] + '</text>';
+    });
+    var last = pts[pts.length - 1];
+    s += '<text x="' + (x(pts.length - 1) + 12) + '" y="' + (y(last) - 8) + '" font-size="15" font-weight="600" fill="' + ink + '">$' + last.toFixed(2) + '</text>';
+    svg.innerHTML = s;
+  }
+
+  shock.addEventListener("input", render);
+  baseWti.addEventListener("input", render);
+  baseGas.addEventListener("input", render);
+  document.querySelector(".presets").addEventListener("click", function (e) {
+    var b = e.target.closest("button"); if (!b) return;
+    shock.value = b.dataset.v; render();
+  });
+  $("form").addEventListener("submit", function (e) { e.preventDefault(); });
+  try {
+    window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", render);
+    new MutationObserver(render).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+  } catch (err) {}
+  render();
+})();
+</script>

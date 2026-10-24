@@ -1,0 +1,278 @@
+{
+  "window": [
+    "2005-01",
+    "2026-07"
+  ],
+  "n_months": 259,
+  "levels_model": {
+    "r2_crude_only": 0.769,
+    "r2_full": 0.922,
+    "crude_only_intercept_usd_gal": 1.093,
+    "crude_only_slope": 1.082,
+    "coefficients": {
+      "Crude oil price": {
+        "coef": 0.9994,
+        "se": 0.0926,
+        "t": 10.79
+      },
+      "Crude inventories": {
+        "coef": -0.7679,
+        "se": 0.2824,
+        "t": -2.72
+      },
+      "Crude production": {
+        "coef": 0.0539,
+        "se": 0.0109,
+        "t": 4.96
+      },
+      "Oil rig count": {
+        "coef": 0.0134,
+        "se": 0.0115,
+        "t": 1.17
+      },
+      "Industrial production (demand)": {
+        "coef": -0.0058,
+        "se": 0.0651,
+        "t": -0.09
+      }
+    },
+    "drop_one_r2_loss": {
+      "Crude oil price": 0.2755,
+      "Crude inventories": 0.0096,
+      "Crude production": 0.0381,
+      "Oil rig count": 0.004,
+      "Industrial production (demand)": 0.0,
+      "Seasonality (month)": 0.0294
+    }
+  },
+  "correlations": {
+    "gasoline_usd_gal": {
+      "gasoline_usd_gal": 1.0,
+      "wti_usd_bbl": 0.88,
+      "crude_stocks_kbbl": -0.54,
+      "crude_production_kbd": 0.19,
+      "oil_rigs": 0.41,
+      "industrial_production": 0.28
+    },
+    "wti_usd_bbl": {
+      "gasoline_usd_gal": 0.88,
+      "wti_usd_bbl": 1.0,
+      "crude_stocks_kbbl": -0.39,
+      "crude_production_kbd": -0.17,
+      "oil_rigs": 0.43,
+      "industrial_production": 0.12
+    },
+    "crude_stocks_kbbl": {
+      "gasoline_usd_gal": -0.54,
+      "wti_usd_bbl": -0.39,
+      "crude_stocks_kbbl": 1.0,
+      "crude_production_kbd": -0.37,
+      "oil_rigs": 0.15,
+      "industrial_production": -0.22
+    },
+    "crude_production_kbd": {
+      "gasoline_usd_gal": 0.19,
+      "wti_usd_bbl": -0.17,
+      "crude_stocks_kbbl": -0.37,
+      "crude_production_kbd": 1.0,
+      "oil_rigs": 0.0,
+      "industrial_production": 0.51
+    },
+    "oil_rigs": {
+      "gasoline_usd_gal": 0.41,
+      "wti_usd_bbl": 0.43,
+      "crude_stocks_kbbl": 0.15,
+      "crude_production_kbd": 0.0,
+      "oil_rigs": 1.0,
+      "industrial_production": 0.25
+    },
+    "industrial_production": {
+      "gasoline_usd_gal": 0.28,
+      "wti_usd_bbl": 0.12,
+      "crude_stocks_kbbl": -0.22,
+      "crude_production_kbd": 0.51,
+      "oil_rigs": 0.25,
+      "industrial_production": 1.0
+    }
+  },
+  "pass_through": {
+    "lag_coefs": {
+      "month_0": 0.726,
+      "month_1": 0.387,
+      "month_2": -0.014,
+      "month_3": -0.023
+    },
+    "cumulative": {
+      "month_0": 0.726,
+      "month_1": 1.113,
+      "month_2": 1.099,
+      "month_3": 1.076
+    },
+    "long_run": 1.076,
+    "long_run_se": 0.095,
+    "cents_per_gal_per_usd_bbl": 2.56,
+    "share_passed_by_month_1": 1.034,
+    "r2": 0.727,
+    "n": 255,
+    "other_drivers_monthly_changes": {
+      "d_stocks": {
+        "coef": -0.2677,
+        "t": -0.46
+      },
+      "d_prod": {
+        "coef": 0.0059,
+        "t": 0.16
+      },
+      "d_rigs": {
+        "coef": 0.0207,
+        "t": 0.85
+      },
+      "d_indpro": {
+        "coef": -0.081,
+        "t": -1.37
+      }
+    }
+  },
+  "asymmetry": {
+    "up_cumulative": {
+      "month_0": 0.637,
+      "month_1": 1.009,
+      "month_2": 1.129,
+      "month_3": 1.218
+    },
+    "down_cumulative": {
+      "month_0": 0.801,
+      "month_1": 1.196,
+      "month_2": 1.094,
+      "month_3": 1.04
+    },
+    "same_month_gap": -0.164,
+    "same_month_t": -1.04,
+    "long_run_gap": 0.178,
+    "long_run_t": 0.95
+  },
+  "seasonality_usd_gal": {
+    "1": -0.163,
+    "2": -0.127,
+    "3": -0.021,
+    "4": 0.048,
+    "5": 0.135,
+    "6": 0.124,
+    "7": 0.081,
+    "8": 0.066,
+    "9": 0.063,
+    "10": -0.007,
+    "11": -0.071,
+    "12": -0.129
+  },
+  "spread": {
+    "mean": 1.23,
+    "mean_2005_2019": 1.11,
+    "mean_2022_on": 1.61,
+    "by_year": {
+      "2005": 0.92,
+      "2006": 1.0,
+      "2007": 1.08,
+      "2008": 0.88,
+      "2009": 0.88,
+      "2010": 0.89,
+      "2011": 1.26,
+      "2012": 1.38,
+      "2013": 1.17,
+      "2014": 1.14,
+      "2015": 1.26,
+      "2016": 1.12,
+      "2017": 1.21,
+      "2018": 1.18,
+      "2019": 1.24,
+      "2020": 1.23,
+      "2021": 1.38,
+      "2022": 1.7,
+      "2023": 1.67,
+      "2024": 1.48,
+      "2025": 1.54,
+      "2026": 1.72
+    }
+  },
+  "backtest": {
+    "train": "2005-01 to 2019-12",
+    "test": "2020-01 to 2026-07",
+    "mae_full_model": 0.618,
+    "mae_crude_only": 0.415,
+    "mae_naive_last_month": 0.15,
+    "mean_bias_full_model": 0.618,
+    "mean_bias_crude_only": 0.413
+  },
+  "dollar": {
+    "window": [
+      "2021-10",
+      "2026-09"
+    ],
+    "n_months": 60,
+    "corr_monthly_pct_change_dollar_vs_wti": 0.09,
+    "corr_monthly_pct_change_dollar_vs_gas": 0.14
+  },
+  "scenario_base": {
+    "month": "2026-09",
+    "wti_usd_bbl": 97.31,
+    "gasoline_usd_gal": 4.355
+  },
+  "scenarios": [
+    {
+      "crude_change_pct": -30,
+      "new_wti_usd_bbl": 68.12,
+      "gas_change_month0": -0.505,
+      "gas_change_month1": -0.774,
+      "gas_change_full": -0.748,
+      "new_gas_usd_gal": 3.61
+    },
+    {
+      "crude_change_pct": -20,
+      "new_wti_usd_bbl": 77.85,
+      "gas_change_month0": -0.336,
+      "gas_change_month1": -0.516,
+      "gas_change_full": -0.499,
+      "new_gas_usd_gal": 3.86
+    },
+    {
+      "crude_change_pct": -10,
+      "new_wti_usd_bbl": 87.58,
+      "gas_change_month0": -0.168,
+      "gas_change_month1": -0.258,
+      "gas_change_full": -0.249,
+      "new_gas_usd_gal": 4.11
+    },
+    {
+      "crude_change_pct": 10,
+      "new_wti_usd_bbl": 107.04,
+      "gas_change_month0": 0.168,
+      "gas_change_month1": 0.258,
+      "gas_change_full": 0.249,
+      "new_gas_usd_gal": 4.6
+    },
+    {
+      "crude_change_pct": 20,
+      "new_wti_usd_bbl": 116.77,
+      "gas_change_month0": 0.336,
+      "gas_change_month1": 0.516,
+      "gas_change_full": 0.499,
+      "new_gas_usd_gal": 4.85
+    },
+    {
+      "crude_change_pct": 30,
+      "new_wti_usd_bbl": 126.5,
+      "gas_change_month0": 0.505,
+      "gas_change_month1": 0.774,
+      "gas_change_full": 0.748,
+      "new_gas_usd_gal": 5.1
+    }
+  ],
+  "scenario_params": {
+    "cumulative_pass_through": [
+      0.7261,
+      1.113,
+      1.099,
+      1.076
+    ]
+  }
+}
